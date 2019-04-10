@@ -1,0 +1,23 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: ingress-injector
+  labels:
+    app: {{ template "ingress-injector.name" . }}
+    chart: {{ template "ingress-injector.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+webhooks:
+  - name: ingress-injector.ippen.io
+    clientConfig:
+      service:
+        name: ingress-injector
+        namespace: {{ .Release.Namespace }}
+        path: "/inject"
+      caBundle: "{{ .Values.caBundle }}"
+    rules:
+      - operations:  [ "CREATE" ]
+        apiGroups:   [ "extensions" ]
+        apiVersions: [ "v1beta1" ]
+        resources:   [ "ingresses" ]
+    failurePolicy: Fail

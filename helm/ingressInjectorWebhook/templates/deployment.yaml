@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-injector
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: ingress-injector
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: ingress-injector
+    spec:
+      serviceAccountName: ingress-injector-service-account
+      containers:
+        - name: ingress-injector-webhook
+          image: "{{ .Values.image }}"
+          imagePullPolicy: Always
+          args:
+            - --tls-cert-file=/certs/cert.pem
+            - --tls-private-key-file=/certs/key.pem
+            - --class={{ .Values.class }}
+          volumeMounts:
+          - name: certs
+            mountPath: /certs
+            readOnly: true
+      volumes:
+      - name: certs
+        secret:
+          secretName: ingress-injector-webhook-certs

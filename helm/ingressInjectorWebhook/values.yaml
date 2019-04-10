@@ -1,0 +1,4 @@
+replicaCount: 1
+image: michas2/set-default-ingress-class-hook
+class: nginx
+caBundle: ""
